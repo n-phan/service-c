@@ -111,6 +111,20 @@ def health():
     return {"status": "ok", "service": "service-c"}
 
 
+@app.post("/configure")
+async def configure(body: dict):
+    """Toggle GATEWAY_FAIL at runtime without restarting the container."""
+    os.environ["GATEWAY_FAIL"] = "1" if body.get("gateway_fail") else "0"
+    return {"gateway_fail": os.environ["GATEWAY_FAIL"] == "1"}
+
+
+@app.post("/reset")
+async def reset_config():
+    """Restore service-c to its default (no failure injection)."""
+    os.environ["GATEWAY_FAIL"] = "0"
+    return {"gateway_fail": False}
+
+
 @app.get("/metrics")
 def metrics():
     """Expose Prometheus metrics in text/plain format."""
